@@ -1,94 +1,114 @@
-import React from 'react';
+'use client';
 
-const AddLearnerModal = () => {
-  return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-900 bg-opacity-50 font-sans">
-      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
-        
-        {/* Header */}
-        <div className="flex justify-between items-start mb-6">
-          <div className="flex items-center gap-3">
-            <div className="bg-indigo-50 text-indigo-600 p-2 rounded-lg">
-              {/* Icon Placeholder */}
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-            </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Add New Learner</h2>
-              <p className="text-sm text-gray-500">Register a new student under the Lower Secondary curriculum.</p>
-            </div>
-          </div>
-          <button className="text-gray-400 hover:text-gray-600">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
-        </div>
+import { useActionState } from 'react';
+import { addLearner, FormState } from '@/app/actions/learners';
 
-        {/* Form */}
-        <form className="space-y-4">
-          
-          {/* LIN */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Learner Identification Number (LIN) (Optional)</label>
-            <input type="text" placeholder="e.g. LIN-2024-8901" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
-          </div>
-
-          {/* First Name & Last Name */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">First Name *</label>
-              <input type="text" placeholder="e.g. Emmanuel" required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Last Name *</label>
-              <input type="text" placeholder="e.g. Okello" required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-          </div>
-
-          {/* Other Names */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Other Name(s) (Optional)</label>
-            <input type="text" placeholder="e.g. James" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
-          </div>
-
-          {/* Gender & Class */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Gender *</label>
-              <select required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
-            <div className="flex-1">
-              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Class *</label>
-              <select required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500">
-                <option value="S1">Senior 1 (S1)</option>
-                <option value="S2">Senior 2 (S2)</option>
-                <option value="S3">Senior 3 (S3)</option>
-                <option value="S4">Senior 4 (S4)</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Stream */}
-          <div>
-            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Stream (Optional)</label>
-            <input type="text" placeholder="e.g. A" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-            <button type="button" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium">
-              Cancel
-            </button>
-            <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium shadow-sm">
-              Save Learner
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+const initialState: FormState = {
+  success: false,
+  error: null,
 };
 
-export default AddLearnerModal;
+export default function AddLearnerForm() {
+  const [state, formAction, isPending] = useActionState(addLearner, initialState);
+
+  return (
+    <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md border border-gray-100">
+      <h2 className="text-xl font-bold text-gray-800 border-b pb-3 mb-4">Add New Learner</h2>
+
+      {/* Alert Messages */}
+      {state?.error && (
+        <div className="mb-4 p-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg">
+          {state.error}
+        </div>
+      )}
+
+      {state?.success && (
+        <div className="mb-4 p-3 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg">
+          Learner successfully added!
+        </div>
+      )}
+
+      <form action={formAction} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
+              First Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="firstName"
+              name="firstName"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+              placeholder="e.g. John"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              required
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+              placeholder="e.g. Doe"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="learnerCode" className="block text-sm font-medium text-gray-700 mb-1">
+            Learner ID / Registration No. <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            id="learnerCode"
+            name="learnerCode"
+            required
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+            placeholder="e.g. LRN-2026-001"
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="grade" className="block text-sm font-medium text-gray-700 mb-1">
+              Grade / Level
+            </label>
+            <input
+              type="text"
+              id="grade"
+              name="grade"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+              placeholder="e.g. Grade 10"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="className" className="block text-sm font-medium text-gray-700 mb-1">
+              Class / Stream
+            </label>
+            <input
+              type="text"
+              id="className"
+              name="className"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+              placeholder="e.g. Room 10-A"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isPending}
+          className="w-full mt-2 py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
+        >
+          {isPending ? 'Saving Learner...' : 'Add Learner'}
+        </button>
+      </form>
+    </div>
+  );
+}
