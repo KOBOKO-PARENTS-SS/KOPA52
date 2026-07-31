@@ -119,15 +119,18 @@ export default function EnterMarksPage() {
     }
   };
 
-  return (
+ return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md my-8">
-<<<<<<< HEAD
       {/* Updated dark, visible header title */}
       <h2 className="text-2xl font-bold mb-6 text-slate-900">Enter Student Grades (NLSC)</h2>
-=======
-      <h2 className="text-2xl font-bold mb-6 text-gray-600">Enter Student Grades (NLSC)</h2>
->>>>>>> e5d2a2a9c31288cf11fc9be8ec7d0695d9193762
 
+      {message.text && (
+        <div className={`p-4 mb-4 rounded-md text-sm ${
+          message.type === 'success' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'
+        }`}>
+          {message.text}
+        </div>
+      )}
       {message.text && (
         <div className={`p-4 mb-4 rounded-md text-sm ${
           message.type === 'success' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'
