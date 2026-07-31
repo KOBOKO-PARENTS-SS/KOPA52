@@ -111,7 +111,7 @@ export default function EnterMarksPage() {
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md my-8">
-      <h2 className="text-2xl font-bold mb-6 text-gray-1000">Enter Student Grades (NLSC)</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-600">Enter Student Grades (NLSC)</h2>
 
       {message.text && (
         <div className={`p-4 mb-4 rounded-md text-sm ${
