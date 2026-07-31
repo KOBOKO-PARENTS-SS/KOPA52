@@ -63,7 +63,7 @@ export default function EnterMarksPage() {
 
     try {
       // Calculate grade breakdown (20% CA, 80% EoC)
-      const gradeResult = calculateNLSCGrade(Number(caScore), 20, Number(eocScore), 100);
+      const gradeResult = calculateNLSCGrade(Number(caScore), 20, Number(eocScore), 80);
 
       // Get current logged-in teacher ID
       const { data: { user } } = await supabase.auth.getUser();
@@ -111,11 +111,11 @@ export default function EnterMarksPage() {
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md my-8">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">Enter Student Grades (NLSC)</h2>
+      <h2 className="text-2xl font-bold mb-6 text-gray-1000">Enter Student Grades (NLSC)</h2>
 
       {message.text && (
         <div className={`p-4 mb-4 rounded-md text-sm ${
-          message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          message.type === 'success' ? 'bg-green-300 text-green-900' : 'bg-red-300 text-red-900'
         }`}>
           {message.text}
         </div>
@@ -124,7 +124,7 @@ export default function EnterMarksPage() {
       <form onSubmit={handleSaveGrade} className="space-y-4">
         {/* Learner Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Select Learner</label>
+          <label className="block text-sm font-medium text-gray-900">Select Learner</label>
           <select 
             value={selectedLearner} 
             onChange={(e) => setSelectedLearner(e.target.value)}
@@ -140,7 +140,7 @@ export default function EnterMarksPage() {
 
         {/* Subject Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-gray-700">Select Subject</label>
+          <label className="block text-sm font-medium text-gray-900">Select Subject</label>
           <select 
             value={selectedSubject} 
             onChange={(e) => setSelectedSubject(e.target.value)}
@@ -157,7 +157,7 @@ export default function EnterMarksPage() {
         {/* Year and Term Selection */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Year</label>
+            <label className="block text-sm font-medium text-gray-900">Year</label>
             <input 
               type="number" 
               value={year} 
@@ -167,7 +167,7 @@ export default function EnterMarksPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Term</label>
+            <label className="block text-sm font-medium text-gray-900">Term</label>
             <select 
               value={term} 
               onChange={(e) => setTerm(e.target.value)} 
@@ -183,7 +183,7 @@ export default function EnterMarksPage() {
         {/* Continuous Assessment & End of Term Exam */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">CA Score (Out of 20)</label>
+            <label className="block text-sm font-medium text-gray-900">CA Score (Out of 20)</label>
             <input 
               type="number" 
               step="0.1" 
@@ -196,11 +196,11 @@ export default function EnterMarksPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Exam Score (Out of 100)</label>
+            <label className="block text-sm font-medium text-gray-900">Exam Score (Out of 80)</label>
             <input 
               type="number" 
               step="0.1" 
-              max="100" 
+              max="80" 
               value={eocScore} 
               onChange={(e) => setEocScore(e.target.value)} 
               className="w-full border p-2 rounded mt-1" 

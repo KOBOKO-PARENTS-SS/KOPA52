@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { X, Loader2, UserPlus } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient"; // Adjust path to your Supabase browser client
+import { supabase } from "@/lib/supabaseClient";
 
 interface AddLearnerModalProps {
   isOpen: boolean;
@@ -30,7 +30,6 @@ export default function AddLearnerModal({
   onClose,
   onLearnerAdded,
 }: AddLearnerModalProps) {
-
   const [formData, setFormData] = useState<FormData>({
     lin: "",
     fullName: "",
@@ -121,10 +120,12 @@ export default function AddLearnerModal({
 
       if (onLearnerAdded) onLearnerAdded();
       onClose();
-    } catch (err: any) {
-      setSubmitError(
-        err.message || "Failed to register learner. Please try again."
-      );
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to register learner. Please try again.";
+      setSubmitError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -133,7 +134,6 @@ export default function AddLearnerModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
       <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
           <div className="flex items-center gap-2">
@@ -141,7 +141,9 @@ export default function AddLearnerModal({
               <UserPlus className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">Add New Learner</h2>
+              <h2 className="text-lg font-bold text-slate-900">
+                Add New Learner
+              </h2>
               <p className="text-xs text-slate-500">
                 Register a new student under the Lower Secondary curriculum.
               </p>
@@ -181,7 +183,9 @@ export default function AddLearnerModal({
               }`}
             />
             {errors.lin && (
-              <p className="mt-1 text-xs text-red-600 font-medium">{errors.lin}</p>
+              <p className="mt-1 text-xs text-red-600 font-medium">
+                {errors.lin}
+              </p>
             )}
           </div>
 
