@@ -1,255 +1,67 @@
-"use client";
+import React from 'react';
 
-import React, { useState } from "react";
-import { X, Loader2, UserPlus } from "lucide-react";
-import { supabase } from "@/lib/supabaseClient";
-
-interface AddLearnerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onLearnerAdded?: () => void;
-}
-
-interface FormData {
-  lin: string;
-  fullName: string;
-  gender: "Male" | "Female" | "";
-  classLevel: string;
-  stream: string;
-}
-
-interface FormErrors {
-  lin?: string;
-  fullName?: string;
-  gender?: string;
-  classLevel?: string;
-}
-
-export default function AddLearnerModal({
-  isOpen,
-  onClose,
-  onLearnerAdded,
-}: AddLearnerModalProps) {
-  const [formData, setFormData] = useState<FormData>({
-    lin: "",
-    fullName: "",
-    gender: "",
-    classLevel: "S1",
-    stream: "A",
-  });
-
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [loading, setLoading] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
-
-  // Form Validation Logic
-  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    // LIN Validation (Learner Identification Number)
-    if (!formData.lin.trim()) {
-      newErrors.lin = "Learner Identification Number (LIN) is required.";
-    } else if (!/^[A-Z0-9-]{6,15}$/i.test(formData.lin.trim())) {
-      newErrors.lin = "Enter a valid LIN (6-15 alphanumeric characters).";
-    }
-
-    // Full Name Validation
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = "Learner's full name is required.";
-    } else if (formData.fullName.trim().length < 3) {
-      newErrors.fullName = "Name must be at least 3 characters long.";
-    }
-
-    // Gender Validation
-    if (!formData.gender) {
-      newErrors.gender = "Please select a gender.";
-    }
-
-    // Class Validation
-    if (!formData.classLevel) {
-      newErrors.classLevel = "Class level is required.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear specific field error on change
-    if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitError(null);
-
-    if (!validateForm()) return;
-
-    setLoading(true);
-
-    try {
-      const { error } = await supabase.from("learners").insert([
-        {
-          lin: formData.lin.trim().toUpperCase(),
-          full_name: formData.fullName.trim(),
-          gender: formData.gender,
-          class_level: formData.classLevel,
-          stream: formData.stream.trim(),
-        },
-      ]);
-
-      if (error) throw error;
-
-      // Reset form on success
-      setFormData({
-        lin: "",
-        fullName: "",
-        gender: "",
-        classLevel: "S1",
-        stream: "A",
-      });
-
-      if (onLearnerAdded) onLearnerAdded();
-      onClose();
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to register learner. Please try again.";
-      setSubmitError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+const AddLearnerModal = () => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="flex justify-center items-center min-h-screen bg-gray-900 bg-opacity-50 font-sans">
+      <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+        
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-slate-50">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-indigo-50 text-indigo-600 rounded-lg">
-              <UserPlus className="w-5 h-5" />
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex items-center gap-3">
+            <div className="bg-indigo-50 text-indigo-600 p-2 rounded-lg">
+              {/* Icon Placeholder */}
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
-                Add New Learner
-              </h2>
-              <p className="text-xs text-slate-500">
-                Register a new student under the Lower Secondary curriculum.
-              </p>
+              <h2 className="text-xl font-bold text-gray-900">Add New Learner</h2>
+              <p className="text-sm text-gray-500">Register a new student under the Lower Secondary curriculum.</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-          >
-            <X className="w-5 h-5" />
+          <button className="text-gray-400 hover:text-gray-600">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {submitError && (
-            <div className="p-3 text-xs font-medium text-red-700 bg-red-50 rounded-lg border border-red-200">
-              {submitError}
+        {/* Form */}
+        <form className="space-y-4">
+          
+          {/* LIN */}
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Learner Identification Number (LIN) (Optional)</label>
+            <input type="text" placeholder="e.g. LIN-2024-8901" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
+          </div>
+
+          {/* First Name & Last Name */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">First Name *</label>
+              <input type="text" placeholder="e.g. Emmanuel" required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
-          )}
-
-          {/* LIN Field */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Learner Identification Number (LIN) *
-            </label>
-            <input
-              type="text"
-              name="lin"
-              value={formData.lin}
-              onChange={handleChange}
-              placeholder="e.g. LIN-2024-8901"
-              className={`w-full px-3 py-2 text-sm text-slate-900 bg-white border rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 ${
-                errors.lin
-                  ? "border-red-300 focus:ring-red-500"
-                  : "border-slate-300 focus:ring-indigo-500"
-              }`}
-            />
-            {errors.lin && (
-              <p className="mt-1 text-xs text-red-600 font-medium">
-                {errors.lin}
-              </p>
-            )}
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Last Name *</label>
+              <input type="text" placeholder="e.g. Okello" required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
+            </div>
           </div>
 
-          {/* Full Name */}
+          {/* Other Names */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Full Name *
-            </label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              placeholder="e.g. Okello Emmanuel"
-              className={`w-full px-3 py-2 text-sm text-slate-900 bg-white border rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 ${
-                errors.fullName
-                  ? "border-red-300 focus:ring-red-500"
-                  : "border-slate-300 focus:ring-indigo-500"
-              }`}
-            />
-            {errors.fullName && (
-              <p className="mt-1 text-xs text-red-600 font-medium">
-                {errors.fullName}
-              </p>
-            )}
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Other Name(s) (Optional)</label>
+            <input type="text" placeholder="e.g. James" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
           </div>
 
-          {/* Gender & Class Row */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Gender *
-              </label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                className={`w-full px-3 py-2 text-sm text-slate-900 bg-white border rounded-lg focus:outline-none focus:ring-2 ${
-                  errors.gender
-                    ? "border-red-300 focus:ring-red-500"
-                    : "border-slate-300 focus:ring-indigo-500"
-                }`}
-              >
+          {/* Gender & Class */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Gender *</label>
+              <select required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
               </select>
-              {errors.gender && (
-                <p className="mt-1 text-xs text-red-600 font-medium">
-                  {errors.gender}
-                </p>
-              )}
             </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-                Class *
-              </label>
-              <select
-                name="classLevel"
-                value={formData.classLevel}
-                onChange={handleChange}
-                className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
+            <div className="flex-1">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Class *</label>
+              <select required className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500">
                 <option value="S1">Senior 1 (S1)</option>
                 <option value="S2">Senior 2 (S2)</option>
                 <option value="S3">Senior 3 (S3)</option>
@@ -260,46 +72,23 @@ export default function AddLearnerModal({
 
           {/* Stream */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
-              Stream (Optional)
-            </label>
-            <input
-              type="text"
-              name="stream"
-              value={formData.stream}
-              onChange={handleChange}
-              placeholder="e.g. North, Blue, or A"
-              className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-lg placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Stream (Optional)</label>
+            <input type="text" placeholder="e.g. A" className="w-full border border-gray-300 rounded-md p-2 text-gray-900 focus:ring-indigo-500 focus:border-indigo-500" />
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={loading}
-              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
-            >
+          <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+            <button type="button" className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 font-medium">
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Learner"
-              )}
+            <button type="submit" className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 font-medium shadow-sm">
+              Save Learner
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
+};
+
+export default AddLearnerModal;
