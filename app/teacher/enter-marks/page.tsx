@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 import { calculateNLSCGrade } from '@/lib/grading';
+import AddLearnerModal from '@/components/AddLearnerModal'; // Adjust import path if needed
 
 // 1. Explicit TypeScript Interfaces
 interface Learner {
@@ -36,6 +37,9 @@ export default function EnterMarksPage() {
   const [caScore, setCaScore] = useState<string>('');
   const [eocScore, setEocScore] = useState<string>('');
 
+  // Modal State
+  const [isAddLearnerOpen, setIsAddLearnerOpen] = useState<boolean>(false);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<StatusMessage>({ type: '', text: '' });
 
@@ -48,23 +52,38 @@ export default function EnterMarksPage() {
     setMessage({ type: '', text: '' });
   };
 
+  // Fetch Learners function memoized for reuse
+  const fetchLearners = useCallback(async () => {
+    const { data: learnersData } = await supabase
+      .from('learners')
+      .select('id, first_name, last_name, lin');
+
+    if (learnersData) setLearners(learnersData as Learner[]);
+  }, []);
+
   // 1. Fetch Learners and Subjects from Supabase when the page loads
   useEffect(() => {
     async function fetchData() {
-      const { data: learnersData } = await supabase
-        .from('learners')
-        .select('id, first_name, last_name, lin');
+      fetchLearners();
       const { data: subjectsData } = await supabase
         .from('subjects')
         .select('id, name, subject_code');
 
-      if (learnersData) setLearners(learnersData as Learner[]);
       if (subjectsData) setSubjects(subjectsData as Subject[]);
     }
     fetchData();
-  }, []);
+  }, [fetchLearners]);
 
-  // 2. Submit and Save to Database with FormEvent typing
+  // Callback when a learner is successfully created via modal
+  const handleLearnerAdded = async () => {
+    await fetchLearners();
+    setMessage({
+      type: 'success',
+      text: 'New learner created successfully! You can now select them from the list.',
+    });
+  };
+
+  // 2. Submit and Save to Database
   const handleSaveGrade = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -91,10 +110,10 @@ export default function EnterMarksPage() {
             teacher_id: user.id,
             year: Number(year),
             term: Number(term),
-            ca_score: gradeResult.caContribution,  // Stored out of 20
-            eoc_score: gradeResult.eocContribution, // Stored out of 80
+            ca_score: gradeResult.caContribution,
+            eoc_score: gradeResult.eocContribution,
           },
-          { onConflict: 'learner_id, subject_id, year, term' } // Prevents duplicates
+          { onConflict: 'learner_id, subject_id, year, term' }
         );
 
       if (error) throw error;
@@ -119,134 +138,152 @@ export default function EnterMarksPage() {
     }
   };
 
- return (
-    <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md my-8">
-      {/* Updated dark, visible header title */}
-      <h2 className="text-2xl font-bold mb-6 text-slate-900">Enter Student Grades (NLSC)</h2>
+  return (
+    <>
+      <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md my-8">
+        <h2 className="text-2xl font-bold mb-6 text-slate-900">Enter Student Grades (NLSC)</h2>
 
-      {message.text && (
-        <div className={`p-4 mb-4 rounded-md text-sm ${
-          message.type === 'success' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'
-        }`}>
-          {message.text}
-        </div>
-      )}
-      {message.text && (
-        <div className={`p-4 mb-4 rounded-md text-sm ${
-          message.type === 'success' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'
-        }`}>
-          {message.text}
-        </div>
-      )}
-
-      <form onSubmit={handleSaveGrade} className="space-y-4">
-        {/* Learner Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-slate-800">Select Learner</label>
-          <select
-            value={selectedLearner}
-            onChange={(e) => setSelectedLearner(e.target.value)}
-            className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          >
-            <option value="">-- Choose Learner --</option>
-            {learners.map((l) => (
-              <option key={l.id} value={l.id}>{l.first_name} {l.last_name} ({l.lin})</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Subject Dropdown */}
-        <div>
-          <label className="block text-sm font-medium text-slate-800">Select Subject</label>
-          <select
-            value={selectedSubject}
-            onChange={(e) => setSelectedSubject(e.target.value)}
-            className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            required
-          >
-            <option value="">-- Choose Subject --</option>
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id}>{s.name} ({s.subject_code})</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Year and Term Selection */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-800">Year</label>
-            <input
-              type="number"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              required
-            />
+        {message.text && (
+          <div className={`p-4 mb-4 rounded-md text-sm ${
+            message.type === 'success' ? 'bg-green-100 text-green-900 border border-green-200' : 'bg-red-100 text-red-900 border border-red-200'
+          }`}>
+            {message.text}
           </div>
+        )}
+
+        <form onSubmit={handleSaveGrade} className="space-y-4">
+          {/* Learner Dropdown with Quick Create Trigger */}
           <div>
-            <label className="block text-sm font-medium text-slate-800">Term</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-slate-800">Select Learner</label>
+              <button
+                type="button"
+                onClick={() => setIsAddLearnerOpen(true)}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
+              >
+                + Add New Learner
+              </button>
+            </div>
             <select
-              value={term}
-              onChange={(e) => setTerm(e.target.value)}
-              className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              value={selectedLearner}
+              onChange={(e) => setSelectedLearner(e.target.value)}
+              className={`w-full border border-slate-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
+                selectedLearner ? 'text-slate-900' : 'text-slate-500/80 font-normal'
+              }`}
+              required
             >
-              <option value="1">Term 1</option>
-              <option value="2">Term 2</option>
-              <option value="3">Term 3</option>
+              <option value="" className="text-slate-400">-- Choose Learner --</option>
+              {learners.map((l) => (
+                <option key={l.id} value={l.id} className="text-slate-900">
+                  {l.first_name} {l.last_name} ({l.lin})
+                </option>
+              ))}
             </select>
           </div>
-        </div>
 
-        {/* Continuous Assessment & End of Term Exam */}
-        <div className="grid grid-cols-2 gap-4">
+          {/* Subject Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-slate-800">CA Score (Out of 20)</label>
-            <input
-              type="number"
-              step="0.1"
-              max="20"
-              value={caScore}
-              onChange={(e) => setCaScore(e.target.value)}
-              className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="e.g. 15.5"
+            <label className="block text-sm font-medium text-slate-800 mb-1">Select Subject</label>
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              className={`w-full border border-slate-300 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors ${
+                selectedSubject ? 'text-slate-900' : 'text-slate-500/80 font-normal'
+              }`}
               required
-            />
+            >
+              <option value="" className="text-slate-400">-- Choose Subject --</option>
+              {subjects.map((s) => (
+                <option key={s.id} value={s.id} className="text-slate-900">
+                  {s.name} ({s.subject_code})
+                </option>
+              ))}
+            </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-800">Exam Score (Out of 80)</label>
-            <input
-              type="number"
-              step="0.1"
-              max="80"
-              value={eocScore}
-              onChange={(e) => setEocScore(e.target.value)}
-              className="w-full border border-slate-300 text-slate-900 p-2 rounded mt-1 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="e.g. 68"
-              required
-            />
-          </div>
-        </div>
 
-        {/* Actions Row */}
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : 'Save Grade'}
-          </button>
-        </div>
-      </form>
-    </div>
+          {/* Year and Term Selection */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-800 mb-1">Year</label>
+              <input
+                type="number"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="w-full border border-slate-300 text-slate-600/90 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-800 mb-1">Term</label>
+              <select
+                value={term}
+                onChange={(e) => setTerm(e.target.value)}
+                className="w-full border border-slate-300 text-slate-600/90 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              >
+                <option value="1">Term 1</option>
+                <option value="2">Term 2</option>
+                <option value="3">Term 3</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Continuous Assessment & End of Term Exam */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-800 mb-1">CA Score (Out of 20)</label>
+              <input
+                type="number"
+                step="0.1"
+                max="20"
+                value={caScore}
+                onChange={(e) => setCaScore(e.target.value)}
+                className="w-full border border-slate-300 text-slate-900 placeholder:text-slate-400 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="e.g. 15.5"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-800 mb-1">Exam Score (Out of 80)</label>
+              <input
+                type="number"
+                step="0.1"
+                max="80"
+                value={eocScore}
+                onChange={(e) => setEocScore(e.target.value)}
+                className="w-full border border-slate-300 text-slate-900 placeholder:text-slate-400 p-2 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="e.g. 68"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Actions Row */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium text-slate-700 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Save Grade'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Add Learner Modal */}
+      <AddLearnerModal
+        isOpen={isAddLearnerOpen}
+        onClose={() => setIsAddLearnerOpen(false)}
+        onLearnerAdded={handleLearnerAdded}
+      />
+    </>
   );
 }
