@@ -65,6 +65,37 @@ export default function AddLearnerModal({
         )}
 
         <form action={formAction} className="space-y-4">
+          {/* LIN & Nationality */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="lin" className="block text-sm font-medium text-gray-700 mb-1">
+                LIN (Learner ID) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="lin"
+                name="lin"
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+                placeholder="e.g. 2601234567"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="nationality" className="block text-sm font-medium text-gray-700 mb-1">
+                Nationality
+              </label>
+              <input
+                type="text"
+                id="nationality"
+                name="nationality"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+                placeholder="e.g. Ugandan"
+              />
+            </div>
+          </div>
+
+          {/* First Name & Last Name */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
@@ -95,48 +126,68 @@ export default function AddLearnerModal({
             </div>
           </div>
 
-          <div>
-            <label htmlFor="learnerCode" className="block text-sm font-medium text-gray-700 mb-1">
-              Learner ID / Registration No. <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              id="learnerCode"
-              name="learnerCode"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
-              placeholder="e.g. LRN-2026-001"
-            />
-          </div>
-
+          {/* Other Name(s) & Gender */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="grade" className="block text-sm font-medium text-gray-700 mb-1">
-                Grade / Level
+              <label htmlFor="otherNames" className="block text-sm font-medium text-gray-700 mb-1">
+                Other Name(s)
               </label>
               <input
                 type="text"
-                id="grade"
-                name="grade"
+                id="otherNames"
+                name="otherNames"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
-                placeholder="e.g. Grade 10"
+                placeholder="e.g. Okello"
               />
             </div>
 
             <div>
-              <label htmlFor="className" className="block text-sm font-medium text-gray-700 mb-1">
-                Class / Stream
+              <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                Gender
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800 bg-white"
+                defaultValue=""
+              >
+                <option value="" disabled>Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Current Class & Stream */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="currentClass" className="block text-sm font-medium text-gray-700 mb-1">
+                Current Class
               </label>
               <input
                 type="text"
-                id="className"
-                name="className"
+                id="currentClass"
+                name="currentClass"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
-                placeholder="e.g. Room 10-A"
+                placeholder="e.g. Senior 1"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="stream" className="block text-sm font-medium text-gray-700 mb-1">
+                Stream
+              </label>
+              <input
+                type="text"
+                id="stream"
+                name="stream"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none text-gray-800"
+                placeholder="e.g. Blue"
               />
             </div>
           </div>
 
+          {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
