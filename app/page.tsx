@@ -11,7 +11,7 @@ export default function HomePage() {
             KP
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-white uppercase pt-2">
-            Koboko Parents SS
+            Koboko Parents Secondary School
           </h1>
           <p className="text-amber-400 italic text-xs font-medium">
             "Together for Excellence"
@@ -29,7 +29,7 @@ export default function HomePage() {
             href="/login"
             className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2 text-sm tracking-wide"
           >
-            🔐 Staff & Teacher Login
+            🔐 Admin & Teacher Login
           </Link>
           <p className="text-slate-400 text-xs">
             Enter your credentials to access your specific portal space.
